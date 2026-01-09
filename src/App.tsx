@@ -1,7 +1,7 @@
 
 import { Route, Routes } from 'react-router-dom'
 import QuizList from './features/QuizList'
-import QuizDetails from './features/QuizDetails'
+import QuizDetails from './features/QuizEdit'
 
 export default function App() {
   return (
@@ -9,7 +9,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<QuizList />} />
         <Route path="/home" element={<QuizList />} />
-        <Route path="/quiz/:quizId" element={<QuizDetails />} />
+        <Route path="/quiz/:quizId/edit" element={<QuizDetails />} />
       </Routes>
     </div>
   )

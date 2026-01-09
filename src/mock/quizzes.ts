@@ -1,6 +1,6 @@
 import type { Quiz } from "../models/quiz";
 
-export const mockQuizzes: Quiz[] = [
+export let mockedQuizzes: Quiz[] = [
   {
     id: 1,
     name: 'Enterwell Quiz',

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import type { Quiz } from '../models/quiz'
-import { IoIosEye } from 'react-icons/io'
+import { AiOutlineEdit } from 'react-icons/ai'
 
 
 interface QuizCardProps {
@@ -24,10 +24,10 @@ export default function QuizCard({ quiz, isOpen, onToggle }: QuizCardProps) {
         </div>
 
         <div
-          className="min-h-4 p-1.5 border rounded cursor-pointer hover:bg-gray-400"
-          onClick={() => navigate(`/quiz/${quiz.id}`)}
+          className="min-h-4 p-2 border rounded cursor-pointer hover:bg-gray-400"
+          onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
         >
-          <IoIosEye />
+          <AiOutlineEdit />
         </div>
       </div>
 
