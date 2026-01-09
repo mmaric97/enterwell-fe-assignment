@@ -11,7 +11,7 @@ export default function QuizList() {
   if (error) return <p className="p-4 text-red-600">Error loading quizzes!</p>
 
   const handleToggle = (quizId: number) => {
-    setOpenQuizId(openQuizId === quizId ? null : quizId) // toggle open/close
+    setOpenQuizId(openQuizId === quizId ? null : quizId)
   }
 
   return (
@@ -20,8 +20,8 @@ export default function QuizList() {
         <QuizCard
           key={quiz.id}
           quiz={quiz}
-          isOpen={openQuizId === quiz.id}   // pass open state
-          onToggle={() => handleToggle(quiz.id)} // pass toggle callback
+          isOpen={openQuizId === quiz.id}  
+          onToggle={() => handleToggle(quiz.id)} 
         />
       ))}
     </div>

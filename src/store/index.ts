@@ -3,10 +3,10 @@ import { api } from './api.ts'
 
 export const store = configureStore({
     reducer: {
-        [api.reducerPath]: api.reducer, // RTK Query reducer
+        [api.reducerPath]: api.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(api.middleware), // RTK Query middleware
+        getDefaultMiddleware().concat(api.middleware), 
 })
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

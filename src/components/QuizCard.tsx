@@ -1,4 +1,6 @@
+import { useNavigate } from 'react-router-dom'
 import type { Quiz } from '../models/quiz'
+import { IoIosEye } from 'react-icons/io'
 
 
 interface QuizCardProps {
@@ -8,13 +10,25 @@ interface QuizCardProps {
 }
 
 export default function QuizCard({ quiz, isOpen, onToggle }: QuizCardProps) {
+  const navigate = useNavigate()
+
   return (
     <div
       className="mb-4 rounded cursor-pointer"
-      onClick={onToggle} // handle click from parent
+      onClick={onToggle}
     >
-      <div className={`p-4 font-semibold ${isOpen ? 'bg-blue-900' : 'bg-blue-600'}`}>
-        {quiz.name}
+
+      <div className={`flex flex-row justify-between content-center py-4 px-6 font-bold ${isOpen ? 'bg-blue-900' : 'bg-blue-600'}`}>
+        <div className="min-h-4 flex items-center">
+          {quiz.name}
+        </div>
+
+        <div
+          className="min-h-4 p-1.5 border rounded cursor-pointer hover:bg-gray-400"
+          onClick={() => navigate(`/quiz/${quiz.id}`)}
+        >
+          <IoIosEye />
+        </div>
       </div>
 
       {isOpen && (
