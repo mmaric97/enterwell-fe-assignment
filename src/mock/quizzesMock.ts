@@ -17,6 +17,21 @@ export const defaultQuizzes: Quiz[] = [
         question: 'What is the capital of France?',
         answer: 'Paris',
       },
+      {
+        id: 3,
+        question: 'What is the capital of Croatia?',
+        answer: 'Zagreb',
+      },
+      {
+        id: 4,
+        question: 'Who was the first president of the United States?',
+        answer: 'George Washington',
+      },
+      {
+        id: 5,
+        question: 'Which continent is the Sahara Desert located in?',
+        answer: 'Africa',
+      },
     ],
   },
   {
@@ -65,6 +80,21 @@ export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
   quizzes[index] = updatedQuiz;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(quizzes));
   return updatedQuiz;
+};
+
+export const deleteQuizFromStorage = (id: number): Quiz | null => {
+  const quizzes = getQuizzesFromStorage();
+  const index = quizzes.findIndex(q => q.id === id);
+  if (index === -1){
+    throw new Error(`Quiz with id ${id} not found.`);
+  } 
+  const [deleted] = quizzes.splice(index, 1);
+  updateQuizzesInStorage(quizzes);
+  return deleted;
+};
+
+export const deleteAllQuizzesFromStorage = () => {
+    localStorage.removeItem(STORAGE_KEY);
 };
 
 export let mockedQuizzes: Quiz[] = getQuizzesFromStorage();

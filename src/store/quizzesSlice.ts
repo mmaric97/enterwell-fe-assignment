@@ -1,15 +1,17 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { Quiz } from '../models/quiz'
-import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi } from './quizessApi'
+import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi, deleteQuizApi } from './quizessApi'
 
 type QuizState = {
     quizzes: Quiz[];
 
-    currentQuiz: Quiz | null;
-
+    currentQuiz: Quiz | undefined;
     isLoading: boolean;
+
     isSaving: boolean;
     isSavedSuccessfully: boolean;
+
+    isDeleting: boolean; 
 
     loadingError: string | undefined;
     saveError: string | undefined;
@@ -18,11 +20,13 @@ type QuizState = {
 const initialState: QuizState = {
     quizzes: [],
 
-    currentQuiz: null,
-
+    currentQuiz: undefined,
     isLoading: false,
+
     isSaving: false,
     isSavedSuccessfully: false,
+
+    isDeleting: false,
 
     loadingError: undefined,
     saveError: undefined,
@@ -68,6 +72,19 @@ export const updateQuiz = createAsyncThunk<Quiz, Quiz, { rejectValue: string }>(
     }
 )
 
+export const deleteQuiz = createAsyncThunk<number, number, { rejectValue: string }>(
+    'quizzes/delete',
+    async (id, { rejectWithValue }) => {
+        try {
+            const result = await deleteQuizApi(id);
+            if (!result) return rejectWithValue(`Quiz with id ${id} not found`);
+            return id;
+        } catch (err: any) {
+            return rejectWithValue(handleAsyncError(err));
+        }
+    }
+)
+
 
 const quizzesSlice = createSlice({
     name: 'quizzes',
@@ -93,6 +110,7 @@ const quizzesSlice = createSlice({
             // fetch single quiz
             .addCase(fetchQuizById.pending, (state) => {
                 state.isLoading = true;
+                state.isSavedSuccessfully = false;
                 state.loadingError = undefined;
             })
             .addCase(fetchQuizById.fulfilled, (state, action) => {
@@ -121,8 +139,23 @@ const quizzesSlice = createSlice({
                 state.isSaving = false;
                 state.isSavedSuccessfully = false;
                 state.saveError = action.payload;
-            });
+            })
 
+            // delete quiz
+            .addCase(deleteQuiz.pending, (state) => {
+                state.isDeleting = true;
+                state.saveError = undefined;
+            })
+            .addCase(deleteQuiz.fulfilled, (state, action) => {
+                state.isDeleting = false;
+                const id = action.payload;
+                state.quizzes = state.quizzes.filter(q => q.id !== id);
+                if (state.currentQuiz?.id === id) state.currentQuiz = undefined;
+            })
+            .addCase(deleteQuiz.rejected, (state, action) => {
+                state.isDeleting = false;
+                state.saveError = action.payload;
+            });
     },
 })
 
