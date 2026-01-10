@@ -43,7 +43,7 @@ export default function QuizCard({ quiz, isOpen, onToggle }: QuizCardProps) {
             className="min-h-4 p-2 border-2 bg-lime rounded cursor-pointer hover:bg-gray-400"
             onClick={(e) => {
               e.stopPropagation();
-              dispatch(deleteQuiz(quiz.id))
+              dispatch(deleteQuiz(quiz.id!))
             }}
           >
             <IoCloseOutline />

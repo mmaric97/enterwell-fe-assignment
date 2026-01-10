@@ -1,4 +1,4 @@
-import { getQuizFromStorage, getQuizzesFromStorage, updateQuizInStorage, deleteQuizFromStorage } from '../mock/quizzesMock'
+import { getQuizFromStorage, getQuizzesFromStorage, updateQuizInStorage, deleteQuizFromStorage, addQuizToStorage } from '../mock/quizzesMock'
 import type { Quiz } from '../models/quiz'
 
 export const API_BASE = 'http://quiz-maker.apidocs.enterwell.space'
@@ -69,6 +69,20 @@ export const deleteQuizApi = async (id: number): Promise<boolean> => {
 
   return true;
 }
+
+export const addQuizApi = async (quiz: Quiz): Promise<Quiz> => {
+
+  await new Promise((res) => setTimeout(res, FETCHING_DATA_DURATION));
+
+  if (Math.random() < MISTAKE_PROBABILITY) {
+    throw new Error('Random API error');
+  }
+
+  addQuizToStorage(quiz);
+
+  return { ...quiz };
+}
+
 
 
 

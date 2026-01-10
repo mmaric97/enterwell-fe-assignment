@@ -5,9 +5,12 @@ import type { RootState } from '../store'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { fetchQuizzes } from '../store/quizzesSlice'
 import { deleteAllQuizzesFromStorage } from '../mock/quizzesMock'
+import { useNavigate } from 'react-router-dom'
 
 export default function QuizList() {
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  
   const { quizzes: data, isLoading, loadingError } = useAppSelector(
     (state: RootState) => state.quizzes
   )
@@ -30,6 +33,10 @@ export default function QuizList() {
     window.location.reload();
   };
 
+  const handleCreate = () => {
+    navigate('/quiz/create')
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen gap-4 justify-between py-6">
@@ -40,9 +47,9 @@ export default function QuizList() {
           Reset mock
         </button>
         <button 
-          onClick={handleReset} 
+          onClick={handleCreate} 
           className="px-6 py-2 bg-blue-600 text-white rounded">
-          Add Quiz
+          Create Quiz
         </button>
       </div>
 
@@ -52,7 +59,7 @@ export default function QuizList() {
             key={quiz.id}
             quiz={quiz}
             isOpen={openQuizId === quiz.id}
-            onToggle={() => handleToggle(quiz.id)}
+            onToggle={() => handleToggle(quiz.id!)}
           />
         ))}
       </div>

@@ -4,6 +4,7 @@ import QuizList from './features/QuizList'
 import QuizDetails from './features/QuizEdit'
 import { Provider } from 'react-redux'
 import { store } from './store'
+import QuizAdd from './features/QuizAdd'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Route path="/" element={<QuizList />} />
           <Route path="/home" element={<QuizList />} />
           <Route path="/quiz/:quizId/edit" element={<QuizDetails />} />
+          <Route path="/quiz/create" element={<QuizAdd />} />
         </Routes>
       </Provider>
     </div>

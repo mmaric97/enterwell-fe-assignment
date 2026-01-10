@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { Quiz } from '../models/quiz'
-import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi, deleteQuizApi } from './quizessApi'
+import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi, deleteQuizApi, addQuizApi } from './quizessApi'
 
 type QuizState = {
     quizzes: Quiz[];
@@ -85,6 +85,17 @@ export const deleteQuiz = createAsyncThunk<number, number, { rejectValue: string
     }
 )
 
+export const addQuiz = createAsyncThunk<Quiz, Quiz, { rejectValue: string }>(
+    'quizzes/add',
+    async (quiz, { rejectWithValue }) => {
+        try {
+            return await addQuizApi(quiz);
+        } catch (err: any) {
+            return rejectWithValue(handleAsyncError(err));
+        }
+    }
+)
+
 
 const quizzesSlice = createSlice({
     name: 'quizzes',
@@ -155,7 +166,27 @@ const quizzesSlice = createSlice({
             .addCase(deleteQuiz.rejected, (state, action) => {
                 state.isDeleting = false;
                 state.saveError = action.payload;
-            });
+            })
+
+            // update quiz
+            .addCase(addQuiz.pending, (state) => {
+                state.isSaving = true;
+                state.isSavedSuccessfully = false;
+                state.loadingError = undefined;
+            })
+            .addCase(addQuiz.fulfilled, (state, action) => {
+                state.isSaving = false;
+                state.isSavedSuccessfully = true;
+                state.currentQuiz = action.payload;
+                const index = state.quizzes.findIndex(q => q.id === action.payload.id);
+                if (index !== -1) state.quizzes[index] = action.payload;
+            })
+            .addCase(addQuiz.rejected, (state, action) => {
+                state.isSaving = false;
+                state.isSavedSuccessfully = false;
+                state.saveError = action.payload;
+            })
+            
     },
 })
 
