@@ -1,10 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import QuizCard from '../components/QuizCard'
 import type { Quiz } from '../models/quiz'
-import { useGetQuizzesQuery } from '../store/api'
+import type { RootState } from '../store'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { fetchQuizzes } from '../store/quizzesSlice'
 
 export default function QuizList() {
-  const { data: quizzes, isLoading, error } = useGetQuizzesQuery()
+  const dispatch = useAppDispatch()
+  const { quizzes: data, isLoading, error } = useAppSelector(
+    (state: RootState) => state.quizzes
+  )
+
+  useEffect(() => {
+    dispatch(fetchQuizzes())
+  }, [dispatch])
+
   const [openQuizId, setOpenQuizId] = useState<number | null>(null)
 
   if (isLoading) return <p className="p-4">Loading quizzes...</p>
@@ -16,7 +26,7 @@ export default function QuizList() {
 
   return (
     <div className="flex flex-col gap-4">
-      {quizzes?.map((quiz: Quiz) => (
+      {data?.map((quiz: Quiz) => (
         <QuizCard
           key={quiz.id}
           quiz={quiz}
