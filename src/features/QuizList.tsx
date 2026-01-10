@@ -7,7 +7,7 @@ import { fetchQuizzes } from '../store/quizzesSlice'
 
 export default function QuizList() {
   const dispatch = useAppDispatch()
-  const { quizzes: data, isLoading, error } = useAppSelector(
+  const { quizzes: data, isLoading, loadingError } = useAppSelector(
     (state: RootState) => state.quizzes
   )
 
@@ -18,7 +18,7 @@ export default function QuizList() {
   const [openQuizId, setOpenQuizId] = useState<number | null>(null)
 
   if (isLoading) return <p className="p-4">Loading quizzes...</p>
-  if (error) return <p className="p-4 text-red-600">Error loading quizzes!</p>
+  if (loadingError) return <p className="p-4 text-red-600">Error loading quizzes!</p>
 
   const handleToggle = (quizId: number) => {
     setOpenQuizId(openQuizId === quizId ? null : quizId)

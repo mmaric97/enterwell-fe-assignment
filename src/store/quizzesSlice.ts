@@ -4,51 +4,66 @@ import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi } from './quizessApi'
 
 type QuizState = {
     quizzes: Quiz[];
+
     currentQuiz: Quiz | null;
+
     isLoading: boolean;
-    error: string | null;
+    isSaving: boolean;
+    isSavedSuccessfully: boolean;
+
+    loadingError: string | undefined;
+    saveError: string | undefined;
 }
 
 const initialState: QuizState = {
     quizzes: [],
+
     currentQuiz: null,
+
     isLoading: false,
-    error: null,
+    isSaving: false,
+    isSavedSuccessfully: false,
+
+    loadingError: undefined,
+    saveError: undefined,
 }
 
-export const fetchQuizzes = createAsyncThunk<
-    Quiz[],
-    void,
-    { rejectValue: string }
+const handleAsyncError = (err: unknown, defaultMessage = 'Unknown error'): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  return defaultMessage;
+};
+
+export const fetchQuizzes = createAsyncThunk<Quiz[], void, { rejectValue: string }
 >(
     'quizzes/fetch',
     async (_, { rejectWithValue }) => {
         try {
-            return await fetchQuizzesApi()
-        } catch {
-            return rejectWithValue('Failed to load quizzes')
+            return await fetchQuizzesApi();
+        } catch (err: any) {
+            return rejectWithValue(handleAsyncError(err));
         }
     }
 )
 
-export const fetchQuizById = createAsyncThunk<Quiz, number>(
-  'quizzes/fetchById',
-  async (id, { rejectWithValue }) => {
-    try {
-      return await fetchQuizByIdApi(id);
-    } catch (err: any) {
-      return rejectWithValue(err.message);
+export const fetchQuizById = createAsyncThunk<Quiz, number, { rejectValue: string }>(
+    'quizzes/fetchById',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await fetchQuizByIdApi(id);
+        } catch (err: any) {
+            return rejectWithValue(handleAsyncError(err));
+        }
     }
-  }
 );
 
-export const updateQuiz = createAsyncThunk(
+export const updateQuiz = createAsyncThunk<Quiz, Quiz, { rejectValue: string }>(
     'quizzes/update',
-    async (quiz: Quiz, { rejectWithValue }) => {
+    async (quiz, { rejectWithValue }) => {
         try {
-            return await updateQuizApi(quiz)
-        } catch {
-            return rejectWithValue('Failed to load quizzes')
+            return await updateQuizApi(quiz);
+        } catch (err: any) {
+            return rejectWithValue(handleAsyncError(err));
         }
     }
 )
@@ -60,9 +75,11 @@ const quizzesSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+
+            // fetch all
             .addCase(fetchQuizzes.pending, (state) => {
                 state.isLoading = true
-                state.error = null
+                state.loadingError = undefined
             })
             .addCase(fetchQuizzes.fulfilled, (state, action) => {
                 state.isLoading = false
@@ -70,25 +87,41 @@ const quizzesSlice = createSlice({
             })
             .addCase(fetchQuizzes.rejected, (state, action) => {
                 state.isLoading = false
-                state.error = action.payload ?? 'Error'
+                state.loadingError = action.payload
             })
 
             // fetch single quiz
-            .addCase(fetchQuizById.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(fetchQuizById.fulfilled, (state, action) => { state.isLoading = false; state.currentQuiz = action.payload; })
-            .addCase(fetchQuizById.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
-
-
-            // update quiz
-            .addCase(updateQuiz.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(updateQuiz.fulfilled, (state, action) => {
+            .addCase(fetchQuizById.pending, (state) => {
+                state.isLoading = true;
+                state.loadingError = undefined;
+            })
+            .addCase(fetchQuizById.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.currentQuiz = action.payload;
-                // update the quiz in the list too
+            })
+            .addCase(fetchQuizById.rejected, (state, action) => {
+                state.isLoading = false;
+                state.loadingError = action.payload;
+            })
+
+            // update quiz
+            .addCase(updateQuiz.pending, (state) => {
+                state.isSaving = true;
+                state.isSavedSuccessfully = false;
+                state.loadingError = undefined;
+            })
+            .addCase(updateQuiz.fulfilled, (state, action) => {
+                state.isSaving = false;
+                state.isSavedSuccessfully = true;
+                state.currentQuiz = action.payload;
                 const index = state.quizzes.findIndex(q => q.id === action.payload.id);
                 if (index !== -1) state.quizzes[index] = action.payload;
             })
-            .addCase(updateQuiz.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
+            .addCase(updateQuiz.rejected, (state, action) => {
+                state.isSaving = false;
+                state.isSavedSuccessfully = false;
+                state.saveError = action.payload;
+            });
 
     },
 })

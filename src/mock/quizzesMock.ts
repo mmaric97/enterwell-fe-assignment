@@ -46,7 +46,7 @@ export const getQuizzesFromStorage = (): Quiz[] => {
 export const getQuizFromStorage = (id: number): Quiz => {
   const quizzes = getQuizzesFromStorage();
   const quiz = quizzes.find(q => q.id === id);
-  if (!quiz) throw new Error(`Quiz with id ${id} not found`);
+  if (!quiz) throw new Error(`Quiz with id ${id} not found.`);
   return quiz;
 };
 
@@ -59,7 +59,7 @@ export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
   const index = quizzes.findIndex(q => q.id === updatedQuiz.id);
 
   if (index === -1) {
-    throw new Error(`Quiz with id ${updatedQuiz.id} not found in storage`);
+    throw new Error(`Quiz with id ${updatedQuiz.id} not found.`);
   }
 
   quizzes[index] = updatedQuiz;

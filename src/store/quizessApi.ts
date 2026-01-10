@@ -13,22 +13,22 @@ export const fetchQuizzesApi = async (): Promise<Quiz[]> => {
   //const response = await fetch(API_PATHS.QUIZZES)
   //return response.json()
 
-  if (Math.random() < 0.1) {
-    throw new Error('Random API error')
+  if (Math.random() < 0.2) {
+    throw new Error('Random API error');
   }
 
-  await new Promise((res) => setTimeout(res, 1000))
+  await new Promise((res) => setTimeout(res, 1000));
 
-  return getQuizzesFromStorage(); 
+  return getQuizzesFromStorage();
 }
 
 export const fetchQuizByIdApi = async (id: number): Promise<Quiz> => {
   // const response = await fetch(API_PATHS.QUIZ(id))
   // return response.json()
 
-  await new Promise((res) => setTimeout(res, 1000))
+  await new Promise((res) => setTimeout(res, 1000));
 
-  return getQuizFromStorage(id); 
+  return getQuizFromStorage(id);
 }
 
 export const updateQuizApi = async (quiz: Quiz): Promise<Quiz> => {
@@ -39,9 +39,16 @@ export const updateQuizApi = async (quiz: Quiz): Promise<Quiz> => {
   // });
   // return response.json();
 
-  await new Promise((res) => setTimeout(res, 1000))
+  if (Math.random() < 0.2) {
+    throw new Error('Random API error');
+  }
+
+  await new Promise((res) => setTimeout(res, 1000));
 
   updateQuizInStorage(quiz);
 
-  return quiz;
+  return {...quiz};
 }
+
+
+
