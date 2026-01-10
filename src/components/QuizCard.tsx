@@ -25,7 +25,10 @@ export default function QuizCard({ quiz, isOpen, onToggle }: QuizCardProps) {
 
         <div
           className="min-h-4 p-2 border rounded cursor-pointer hover:bg-gray-400"
-          onClick={() => navigate(`/quiz/${quiz.id}/edit`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/quiz/${quiz.id}/edit`)
+          }}
         >
           <AiOutlineEdit />
         </div>
