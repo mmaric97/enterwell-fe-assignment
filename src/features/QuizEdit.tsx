@@ -59,7 +59,7 @@ export default function QuizEdit() {
     };
 
     return (
-        <div className="p-6 max-w-3xl mx-auto space-y-6">
+        <div className="space-y-6 py-6">
             <h1 className="text-2xl font-bold">
                 Edit Quiz {quizId}
             </h1>
