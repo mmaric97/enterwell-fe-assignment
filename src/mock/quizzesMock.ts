@@ -1,3 +1,4 @@
+import type { Question } from "../models/question";
 import type { Quiz } from "../models/quiz";
 
 const STORAGE_KEY = 'quizzes';
@@ -85,13 +86,33 @@ export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
 export const addQuizToStorage = (newQuiz: Quiz): Quiz => {
   const quizzes = getQuizzesFromStorage();
 
-  const maxId = quizzes.length > 0 ? Math.max(...quizzes.map(q => q.id!)) : 0;
-  const quizWithId: Quiz = { ...newQuiz, id: maxId + 1 };
+  const maxQuizId = quizzes.length > 0 ? Math.max(...quizzes.map(q => q.id ?? 0)) : 0;
+  const quizWithId: Quiz = { ...newQuiz, id: maxQuizId + 1 };
+
+  const allQuestions = quizzes.flatMap(q => q.questions);
+  const maxQuestionId = allQuestions.length > 0 ? Math.max(...allQuestions.map(q => q.id!)) : 0;
+
+  quizWithId.questions = quizWithId.questions.map((q, index) => ({
+    ...q,
+    id: maxQuestionId + index + 1,
+  }));
 
   quizzes.push(quizWithId);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(quizzes));
 
-  return newQuiz;
+  return quizWithId;
+};
+
+
+export const getAllQuestionsFromStorage = (): Question[] => {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (!data) return []; 
+
+  const quizzes: Quiz[] = JSON.parse(data);
+
+  const allQuestions: Question[] = quizzes.flatMap(q => q.questions);
+  return allQuestions;
+
 };
 
 export const deleteQuizFromStorage = (id: number): Quiz | null => {
@@ -110,5 +131,8 @@ export const deleteAllQuizzesFromStorage = () => {
 };
 
 export let mockedQuizzes: Quiz[] = getQuizzesFromStorage();
+
+
+
 
 

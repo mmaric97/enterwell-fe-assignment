@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { addQuiz } from "../store/quizzesSlice";
+import { addQuiz, fetchQuestions } from "../store/quizzesSlice";
 import type { Question } from "../models/question";
 import type { Quiz } from "../models/quiz";
 
@@ -9,17 +9,21 @@ export default function QuizAdd() {
 
     const [quizName, setQuizName] = useState('');
     const [questions, setQuestions] = useState<Question[]>([
-        { id: 1, question: '', answer: '' },
+        { question: '', answer: '' },
     ]);
 
-    const { isSaving, isSavedSuccessfully, saveError } = useAppSelector(
+    const { isSaving, isSavedSuccessfully, saveError, allQuestions } = useAppSelector(
         (state) => state.quizzes
     );
 
     useEffect(() => {
+        dispatch(fetchQuestions())
+    }, [dispatch]);
+
+    useEffect(() => {
         if (isSavedSuccessfully) {
             setQuizName('');
-            setQuestions([{ id: 1, question: '', answer: '' }]);
+            setQuestions([{ question: '', answer: '' }]);
         }
     }, [isSavedSuccessfully]);
 
@@ -27,25 +31,34 @@ export default function QuizAdd() {
         setQuizName(value);
     };
 
-    const handleQuestionChange = (id: number, field: 'question' | 'answer', value: string) => {
+    const handleQuestionChange = (index: number, field: 'question' | 'answer' | 'id', value: string | number) => {
         setQuestions((prev) =>
-            prev.map((q) => (q.id === id ? { ...q, [field]: value } : q))
+            prev.map((q, i) => (i === index ? { ...q, [field]: value } : q))
         );
     };
 
     const addNewQuestion = () => {
-        const newId = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
-        setQuestions((prev) => [...prev, { id: newId, question: '', answer: '' }]);
+        setQuestions((prev) => [...prev, { question: '', answer: '' }]);
     };
 
     const removeQuestion = (index: number) => {
         setQuestions((prev) => prev.filter((_, i) => i !== index));
     };
 
+    const handleDropdownChange = (id: string, index: number ) => {
+
+        if (!id) {
+            return;
+        }
+        let questionToAdd = allQuestions.find(q => q.id == Number(id))!;
+
+        handleQuestionChange(index, "id", questionToAdd.id!);
+        handleQuestionChange(index, "question", questionToAdd.question);
+        handleQuestionChange(index, "answer", questionToAdd.answer);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!quizName.trim()) return alert('Quiz name is required');
 
         const newQuiz: Quiz = {
             name: quizName,
@@ -76,12 +89,14 @@ export default function QuizAdd() {
                 {
                     questions.map((q, index) => (
 
-                        <div key={q.id} className="border rounded p-4 space-y-3">
+                        <div key={q.id ?? 0} className="border rounded p-4 space-y-3">
+                            <p>Enter question and answer...</p>
                             <textarea
                                 className="w-full border p-2 rounded"
                                 placeholder="Question"
                                 value={q.question}
-                                onChange={(e) => handleQuestionChange(q.id, 'question', e.target.value)}
+                                onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                                disabled={q.id != null}
                                 required
                             />
 
@@ -89,7 +104,8 @@ export default function QuizAdd() {
                                 className="w-full border p-2 rounded"
                                 value={q.answer}
                                 placeholder="Answer"
-                                onChange={(e) => handleQuestionChange(q.id, 'answer', e.target.value)}
+                                onChange={(e) => handleQuestionChange(index, 'answer', e.target.value, )}
+                                disabled={q.id != null}
                                 required
                             />
 
@@ -102,6 +118,29 @@ export default function QuizAdd() {
                                     </button>
                                 )
                             }
+
+                            <div className="flex flex-col gap-2 pt-1">
+                                <label htmlFor="questions">Or select existing question</label>
+
+                                <select
+                                    id="questions"
+                                    className="h-10 rounded border-2 border-gray-400 rounde text-sm text-gray-500
+                                        focus:outline-none focus:ring-2 focus:ring-indigo-500
+                                        focus:border-indigo-500
+                                        disabled:bg-gray-100
+                                        disabled:cursor-not-allowed
+                                        "
+                                    onChange={(e) => handleDropdownChange(e.target.value, index)}
+                                >
+                                    <option value="">-- Choose a question --</option>
+
+                                    {allQuestions.map((question) => (
+                                        <option key={question.id} value={question.id}>
+                                            {question.question}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     ))
                 }

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { Quiz } from '../models/quiz'
-import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi, deleteQuizApi, addQuizApi } from './quizessApi'
+import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi, deleteQuizApi, addQuizApi, fetchQuestionsApi } from './quizessApi'
+import type { Question } from '../models/question';
 
 type QuizState = {
     quizzes: Quiz[];
@@ -11,10 +12,14 @@ type QuizState = {
     isSaving: boolean;
     isSavedSuccessfully: boolean;
 
-    isDeleting: boolean; 
+    isDeleting: boolean;
 
     loadingError: string | undefined;
     saveError: string | undefined;
+
+    allQuestions: Question[];
+    questionsLoading: boolean;
+    questionsError: string | undefined;
 }
 
 const initialState: QuizState = {
@@ -30,16 +35,19 @@ const initialState: QuizState = {
 
     loadingError: undefined,
     saveError: undefined,
+
+    allQuestions: [],
+    questionsLoading: false,
+    questionsError: undefined
 }
 
 const handleAsyncError = (err: unknown, defaultMessage = 'Unknown error'): string => {
-  if (err instanceof Error) return err.message;
-  if (typeof err === 'string') return err;
-  return defaultMessage;
+    if (err instanceof Error) return err.message;
+    if (typeof err === 'string') return err;
+    return defaultMessage;
 };
 
-export const fetchQuizzes = createAsyncThunk<Quiz[], void, { rejectValue: string }
->(
+export const fetchQuizzes = createAsyncThunk<Quiz[], void, { rejectValue: string }>(
     'quizzes/fetch',
     async (_, { rejectWithValue }) => {
         try {
@@ -90,6 +98,17 @@ export const addQuiz = createAsyncThunk<Quiz, Quiz, { rejectValue: string }>(
     async (quiz, { rejectWithValue }) => {
         try {
             return await addQuizApi(quiz);
+        } catch (err: any) {
+            return rejectWithValue(handleAsyncError(err));
+        }
+    }
+)
+
+export const fetchQuestions = createAsyncThunk<Question[], void, { rejectValue: string }>(
+    'quizzes/fetchQuestions',
+    async (_, { rejectWithValue }) => {
+        try {
+            return await fetchQuestionsApi();
         } catch (err: any) {
             return rejectWithValue(handleAsyncError(err));
         }
@@ -186,7 +205,21 @@ const quizzesSlice = createSlice({
                 state.isSavedSuccessfully = false;
                 state.saveError = action.payload;
             })
-            
+
+            // fetch all questions
+            .addCase(fetchQuestions.pending, (state) => {
+                state.questionsLoading = true;
+                state.loadingError = undefined;
+            })
+            .addCase(fetchQuestions.fulfilled, (state, action) => {
+                state.questionsLoading = false;
+                state.allQuestions = action.payload;
+            })
+            .addCase(fetchQuestions.rejected, (state, action) => {
+                state.isLoading = false;
+                state.questionsError = action.payload;
+            })
+
     },
 })
 
