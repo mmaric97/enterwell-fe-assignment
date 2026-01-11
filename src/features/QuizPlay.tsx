@@ -108,7 +108,7 @@ const QuizPlay = () => {
                         onClick={() => {
                             dispatch(finishQuiz({ quizId: id }));
                             setAnswer("");
-                            navigate('/home')
+                            navigate('/')
                         }}
                     >
                         Finish

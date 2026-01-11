@@ -15,7 +15,7 @@ export default function QuizEdit() {
     );
 
     if (quizId == null || quizId.trim() == "") {
-        navigate('/home')
+        navigate('/')
     }
 
     const [quizCopy, setQuizCopy] = useState<Quiz | null>(null)

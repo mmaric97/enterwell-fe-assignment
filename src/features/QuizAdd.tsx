@@ -71,7 +71,7 @@ export default function QuizAdd() {
     return (
         <div>
             <h1 className="text-2xl font-bold">
-                Add Quiz
+                Create Quiz
             </h1>
 
             <form className="space-y-6 py-6" onSubmit={handleSubmit}>
