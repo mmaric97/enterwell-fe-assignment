@@ -44,6 +44,21 @@ export const defaultQuizzes: Quiz[] = [
         question: 'What is 7 × 8?',
         answer: '56',
       },
+      {
+        id: 7,
+        question: 'What is 8 × 8?',
+        answer: '64',
+      },
+      {
+        id: 8,
+        question: 'What is 9 × 9?',
+        answer: '81',
+      },
+      {
+        id: 9,
+        question: 'What is 9 × 10?',
+        answer: '90',
+      },
     ],
   },
 ];

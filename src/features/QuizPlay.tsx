@@ -5,7 +5,7 @@ import {
     selectCurrentQuestion,
     selectCurrentQuestionIndex,
     selectTotalQuestions,
-    selectCorrectAnswers,
+    selectCorrectAnswersCount,
     submitAnswer,
     startQuiz,
     finishQuiz,
@@ -27,9 +27,10 @@ const QuizPlay = () => {
     const question = useAppSelector(selectCurrentQuestion(id));
     const currentIndex = useAppSelector(selectCurrentQuestionIndex(id));
     const totalQuestions = useAppSelector(selectTotalQuestions(id));
-    const correctAnswers = useAppSelector(selectCorrectAnswers(id));
+    const correctAnswersCount = useAppSelector(selectCorrectAnswersCount(id));
 
     const [answer, setAnswer] = useState<string>('');
+    const [showCorrectAnswer, setShowCorrectAnswer] = useState<boolean>(false);
 
     useEffect(() => {
         dispatch(fetchQuizById(Number(quizId)));
@@ -54,7 +55,7 @@ const QuizPlay = () => {
                             Question {currentIndex + 1} of {totalQuestions}
                         </p>
                         <p className="text-sm text-green-700">
-                            Correct answers: {correctAnswers}
+                            Correct answers: {correctAnswersCount}
                         </p>
                     </div>
 
@@ -72,7 +73,16 @@ const QuizPlay = () => {
                             onChange={(e) => setAnswer(e.target.value)}
                         />
 
-                        <div>
+                        <div className="flex flex-row justify-between">
+                            <button
+                                className="px-6 py-2 border-2 border-blue-600 rounded text-white text-sm"
+                                onClick={() => {
+                                    setShowCorrectAnswer(true);
+                                }}
+                            >
+                                Show answer
+                            </button>
+
                             <button
                                 className="px-6 py-2 mt-2 bg-blue-600 text-white rounded"
                                 onClick={() => {
@@ -84,11 +94,13 @@ const QuizPlay = () => {
                                     );
                                     dispatch(nextQuestion({ quizId: id }));
                                     setAnswer("");
+                                    setShowCorrectAnswer(false);
                                 }}
                             >
                                 Next
                             </button>
                         </div>
+                        {showCorrectAnswer && <p className="text-green-600"> {question?.answer} </p>}
                     </div>
                 </div>
             }
@@ -100,7 +112,7 @@ const QuizPlay = () => {
                     </h2>
 
                     <h3 className="text-m font-semibold mt-2">
-                        Correct answers: <span className="text-green-600"> {correctAnswers} </span> out of {totalQuestions} questions.
+                        Correct answers: <span className="text-green-600"> {correctAnswersCount} </span> out of {totalQuestions} questions.
                     </h3>
 
                     <button

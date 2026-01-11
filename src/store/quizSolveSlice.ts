@@ -90,8 +90,7 @@ export const selectTotalQuestions =
             state.quizSolve.ongoingQuizzes.find(q => q.id === quizId)
                 ?.questions.length ?? 0;
 
-
-export const selectCorrectAnswers =
+export const selectCorrectAnswersCount =
     (quizId: number) =>
         (state: RootState) =>
             state.quizSolve.ongoingQuizzes.find(q => q.id === quizId)
