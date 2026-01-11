@@ -224,5 +224,5 @@ const quizzesSlice = createSlice({
 })
 
 
-export default quizzesSlice.reducer
+export default quizzesSlice.reducer;
 

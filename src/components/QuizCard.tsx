@@ -1,9 +1,10 @@
-import { useNavigate } from 'react-router-dom'
-import type { Quiz } from '../models/quiz'
-import { AiOutlineEdit } from 'react-icons/ai'
-import { IoCloseOutline } from 'react-icons/io5'
-import { useAppDispatch } from '../store/hooks'
-import { deleteQuiz } from '../store/quizzesSlice'
+import { useNavigate } from 'react-router-dom';
+import type { Quiz } from '../models/quiz';
+import { AiOutlineEdit } from 'react-icons/ai';
+import { IoCloseOutline, IoPlayOutline } from 'react-icons/io5';
+import { useAppDispatch } from '../store/hooks';
+import { deleteQuiz } from '../store/quizzesSlice';
+import { startQuiz } from '../store/quizSolveSlice';
 
 
 interface QuizCardProps {
@@ -29,6 +30,17 @@ export default function QuizCard({ quiz, isOpen, onToggle }: QuizCardProps) {
         </div>
 
         <div className='flex flex-row gap-2'>
+          <div
+            className="min-h-4 p-2 border-2 bg-lime rounded cursor-pointer hover:bg-gray-400"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(startQuiz(quiz));
+              navigate(`/quiz/${quiz.id}/play`)
+            }}
+          >
+            <IoPlayOutline />
+          </div>
+
           <div
             className="min-h-4 p-2 border-2 bg-lime rounded cursor-pointer hover:bg-gray-400"
             onClick={(e) => {
