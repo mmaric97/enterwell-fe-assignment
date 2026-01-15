@@ -119,7 +119,16 @@ export const fetchQuestions = createAsyncThunk<Question[], void, { rejectValue: 
 const quizzesSlice = createSlice({
     name: 'quizzes',
     initialState,
-    reducers: {},
+    reducers: {
+        resetEditState(state) {
+            return { 
+                ...state, 
+                isSaving: false, 
+                isSavedSuccessfully: false, 
+                currentQuiz: undefined,
+            };
+        },
+    },
     extraReducers: (builder) => {
         builder
 
@@ -222,6 +231,8 @@ const quizzesSlice = createSlice({
 
     },
 })
+
+export const { resetEditState } = quizzesSlice.actions;
 
 
 export default quizzesSlice.reducer;

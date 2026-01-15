@@ -93,6 +93,19 @@ export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
     throw new Error(`Quiz with id ${updatedQuiz.id} not found.`);
   }
 
+  let everyQuestionsHasId = updatedQuiz.questions.map(q => q.id) != undefined;
+
+  if (everyQuestionsHasId) {
+    const allQuestions = quizzes.flatMap(q => q.questions);
+    const maxQuestionId = allQuestions.length > 0 ? Math.max(...allQuestions.map(q => q.id!)) : 0;
+
+    updatedQuiz.questions = updatedQuiz.questions.map((q, index) => ({
+      ...q,
+      id: maxQuestionId + index + 1,
+    }));
+
+  }
+
   quizzes[index] = updatedQuiz;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(quizzes));
   return updatedQuiz;
@@ -121,7 +134,7 @@ export const addQuizToStorage = (newQuiz: Quiz): Quiz => {
 
 export const getAllQuestionsFromStorage = (): Question[] => {
   const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) return []; 
+  if (!data) return [];
 
   const quizzes: Quiz[] = JSON.parse(data);
 

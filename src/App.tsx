@@ -1,10 +1,9 @@
 
 import { NavLink, Route, Routes } from 'react-router-dom'
 import QuizList from './features/QuizList'
-import QuizDetails from './features/QuizEdit'
 import { Provider } from 'react-redux'
 import { store } from './store'
-import QuizAdd from './features/QuizAdd'
+import QuizAddEdit from './features/QuizAddEdit'
 import QuizPlay from './features/QuizPlay'
 import { deleteAllQuizzesFromStorage } from './mock/quizzesMock'
 
@@ -48,8 +47,8 @@ export default function App() {
           <Provider store={store}>
             <Routes>
               <Route path="/" element={<QuizList />} />
-              <Route path="/quiz/:quizId/edit" element={<QuizDetails />} />
-              <Route path="/quiz/create" element={<QuizAdd />} />
+              <Route path="/quiz/:quizId/edit" element={<QuizAddEdit key="edit" />} />
+              <Route path="/quiz/create" element={<QuizAddEdit key="add" />} />
               <Route path="/quiz/:quizId/play" element={<QuizPlay />} />
             </Routes>
           </Provider>

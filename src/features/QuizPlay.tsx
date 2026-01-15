@@ -34,13 +34,13 @@ const QuizPlay = () => {
 
     useEffect(() => {
         dispatch(fetchQuizById(Number(quizId)));
-    }, [quizId]);
+    }, [dispatch, quizId]);
 
     useEffect(() => {
         if (!question && currentQuiz) {
             dispatch(startQuiz(currentQuiz));
         }
-    }, [currentQuiz]);
+    }, [dispatch, question, currentQuiz]);
 
     if (!question && totalQuestions == 0) {
         return <div>Loading...</div>;
