@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { addQuiz, fetchQuestions, fetchQuizById, resetEditState, updateQuiz } from "../store/quizzesSlice";
-import type { Question } from "../models/question";
-import type { Quiz } from "../models/quiz";
+import { addQuestion, addQuiz, fetchQuestions, fetchQuizById, removeQuestion, resetEditState, startCreateQuiz, swapQuestion, updateQuiz, updateQuizName, updateQuizQuestion } from "../store/quizzesSlice";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export default function QuizAddEdit() {
@@ -17,28 +15,13 @@ export default function QuizAddEdit() {
 
     const { quizId: id } = useParams<{ quizId: string }>();
 
-    const [quizCopy, setQuizCopy] = useState<Quiz>(currentQuiz ?? {
-        name: '',
-        questions: [{ question: '', answer: '' }]
-    } as Quiz)
-
-    useEffect(() => { // Reset on url change
-        if(!isEditMode) {
-            setQuizCopy({ name: '', questions: [{ question: '', answer: '' }] });
-        }
-    }, [isEditMode]);
-
     useEffect(() => {
         if (isEditMode && id) {
             dispatch(fetchQuizById(Number(id)));
+        } else {
+            dispatch(startCreateQuiz());
         }
     }, [isEditMode, id, dispatch]);
-
-    useEffect(() => {
-        if (isEditMode) {
-            setQuizCopy(currentQuiz!);
-        }
-    }, [currentQuiz, isEditMode]);
 
     useEffect(() => {
         dispatch(fetchQuestions());
@@ -50,7 +33,7 @@ export default function QuizAddEdit() {
                 navigate('/');
             }, 1000);
         }
-    }, [isSavedSuccessfully]);
+    }, [isSavedSuccessfully, navigate]);
 
     useEffect(() => {
         return () => {
@@ -58,79 +41,17 @@ export default function QuizAddEdit() {
         };
     }, [dispatch])
 
-    if (isEditMode && !currentQuiz) return <p>Loading quiz...</p>;
-    if (!quizCopy || !quizCopy.questions) return <p>Loading quiz...</p>;
+    if (!currentQuiz) return <p>Loading quiz...</p>;
     if (isLoading && !isSaving) return <p>Loading quiz...</p>;
     if (loadingError) return <p>Error: {loadingError}</p>;
-
-    const handleNameChange = (value: string) => {
-        setQuizCopy({ ...quizCopy, name: value });
-    };
-
-    const handleQuestionChange = (index: number, questionToAdd: Question) => {
-        const updatedQuestions = [...quizCopy.questions];
-        updatedQuestions[index] = {
-            ...updatedQuestions[index],
-            id: questionToAdd.id,
-            question: questionToAdd.question,
-            answer: questionToAdd.answer,
-        };
-        setQuizCopy({ ...quizCopy, questions: updatedQuestions });
-    };
-
-    const handleQuestionInputChange = (index: number,
-        field: 'question' | 'answer', value: string) => {
-        const questions = quizCopy.questions ?? [];
-
-        const updatedQuestions = [...questions];
-
-        updatedQuestions[index] = {
-            ...updatedQuestions[index],
-            [field]: value,
-        };
-
-        setQuizCopy({
-            ...quizCopy,
-            questions: updatedQuestions,
-        });
-    };
-
-    const addNewQuestion = () => {
-        const updatedQuestions =
-            [...quizCopy!.questions,
-            {
-                question: '',
-                answer: ''
-            } as Question
-            ]
-        setQuizCopy({ ...quizCopy, questions: updatedQuestions })
-    };
-
-    const removeQuestion = (index: number) => {
-        const updatedQuestions = [
-            ...quizCopy!.questions.filter((_, i) => i !== index)
-        ]
-
-        setQuizCopy({ ...quizCopy, questions: updatedQuestions })
-    };
-
-    const handleDropdownChange = (id: string, index: number) => {
-
-        if (!id) {
-            return;
-        }
-        const questionToAdd = allQuestions.find(q => q.id == Number(id))!;
-
-        handleQuestionChange(index, questionToAdd);
-    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isEditMode) {
-            dispatch(updateQuiz(quizCopy));
+            dispatch(updateQuiz(currentQuiz));
         } else {
-            dispatch(addQuiz(quizCopy));
+            dispatch(addQuiz(currentQuiz!));
         }
     };
 
@@ -144,24 +65,24 @@ export default function QuizAddEdit() {
                 <div>
                     <input
                         className="w-full border p-2 rounded"
-                        value={quizCopy.name}
+                        value={currentQuiz!.name}
                         placeholder="Quiz name"
-                        onChange={(e) => handleNameChange(e.target.value)}
+                        onChange={(e) => { dispatch(updateQuizName(e.target.value)) }}
                         required
                     />
                 </div>
 
                 <h3>Questions</h3>
                 {
-                    quizCopy.questions.map((q, index) => (
+                    currentQuiz!.questions.map((q, index) => (
 
-                        <div key={q.id ?? index} className="border rounded p-4 space-y-3">
+                        <div key={index} className="border rounded p-4 space-y-3">
                             <p>Enter question and answer...</p>
                             <textarea
                                 className="w-full border p-2 rounded"
                                 placeholder="Question"
                                 value={q.question}
-                                onChange={(e) => handleQuestionInputChange(index, 'question', e.target.value)}
+                                onChange={(e) => dispatch(updateQuizQuestion({ index, field: 'question', value: e.target.value }))}
                                 disabled={q.id != null}
                                 required
                             />
@@ -170,16 +91,16 @@ export default function QuizAddEdit() {
                                 className="w-full border p-2 rounded"
                                 value={q.answer}
                                 placeholder="Answer"
-                                onChange={(e) => handleQuestionInputChange(index, 'answer', e.target.value)}
+                                onChange={(e) => dispatch(updateQuizQuestion({ index, field: 'answer', value: e.target.value }))}
                                 disabled={q.id != null}
                                 required
                             />
 
                             {
-                                quizCopy.questions.length > 1 && (
+                                currentQuiz!.questions.length > 1 && (
                                     <button type="button"
                                         className="px-6 py-2 border-2 border-blue-600 rounded text-white text-sm"
-                                        onClick={() => removeQuestion(index)}>
+                                        onClick={() => { dispatch(removeQuestion({ index })); }}>
                                         Remove Question
                                     </button>
                                 )
@@ -196,12 +117,12 @@ export default function QuizAddEdit() {
                                         disabled:bg-gray-100
                                         disabled:cursor-not-allowed
                                         "
-                                    onChange={(e) => handleDropdownChange(e.target.value, index)}
+                                    onChange={(e) => { dispatch(swapQuestion({ index, newQuestionId: Number(e.target.value) })) }}
                                 >
                                     <option value="">-- Choose a question --</option>
 
                                     {allQuestions.map((question) => (
-                                        <option key={question.id} value={question.id}>
+                                        <option key={"o-" + question.id} value={question.id}>
                                             {question.question}
                                         </option>
                                     ))}
@@ -213,7 +134,7 @@ export default function QuizAddEdit() {
 
                 <button type="button"
                     className="px-6 py-2 border-2 border-blue-600 rounded text-white text-sm"
-                    onClick={addNewQuestion}>
+                    onClick={() => { dispatch(addQuestion()); }}>
                     Add Question
                 </button>
 

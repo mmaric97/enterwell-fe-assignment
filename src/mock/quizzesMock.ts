@@ -86,29 +86,31 @@ export const createQuizzesInStorage = (quizzes: Quiz[]): void => {
 };
 
 export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
+
+  const updatedQuizCopy = {...updatedQuiz};
+
   const quizzes = getQuizzesFromStorage();
-  const index = quizzes.findIndex(q => q.id === updatedQuiz.id);
+  const index = quizzes.findIndex(q => q.id === updatedQuizCopy.id);
 
   if (index === -1) {
-    throw new Error(`Quiz with id ${updatedQuiz.id} not found.`);
+    throw new Error(`Quiz with id ${updatedQuizCopy.id} not found.`);
   }
 
-  let everyQuestionsHasId = updatedQuiz.questions.map(q => q.id) != undefined;
+  const everyQuestionsHasId = updatedQuizCopy.questions.map(q => q.id) != undefined;
 
   if (everyQuestionsHasId) {
     const allQuestions = quizzes.flatMap(q => q.questions);
     const maxQuestionId = allQuestions.length > 0 ? Math.max(...allQuestions.map(q => q.id!)) : 0;
 
-    updatedQuiz.questions = updatedQuiz.questions.map((q, index) => ({
+    updatedQuizCopy.questions = updatedQuizCopy.questions.map((q, index) => ({
       ...q,
       id: maxQuestionId + index + 1,
     }));
-
   }
 
-  quizzes[index] = updatedQuiz;
+  quizzes[index] = updatedQuizCopy;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(quizzes));
-  return updatedQuiz;
+  return updatedQuizCopy;
 };
 
 export const addQuizToStorage = (newQuiz: Quiz): Quiz => {
@@ -158,7 +160,6 @@ export const deleteAllQuizzesFromStorage = () => {
   localStorage.removeItem(STORAGE_KEY);
 };
 
-export let mockedQuizzes: Quiz[] = getQuizzesFromStorage();
 
 
 

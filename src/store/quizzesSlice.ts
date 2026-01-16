@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { Quiz } from '../models/quiz'
 import { fetchQuizByIdApi, fetchQuizzesApi, updateQuizApi, deleteQuizApi, addQuizApi, fetchQuestionsApi } from './quizessApi'
 import type { Question } from '../models/question';
@@ -6,7 +6,7 @@ import type { Question } from '../models/question';
 type QuizState = {
     quizzes: Quiz[];
 
-    currentQuiz: Quiz | undefined;
+    currentQuiz: Quiz | null;
     isLoading: boolean;
 
     isSaving: boolean;
@@ -25,7 +25,7 @@ type QuizState = {
 const initialState: QuizState = {
     quizzes: [],
 
-    currentQuiz: undefined,
+    currentQuiz: null,
     isLoading: false,
 
     isSaving: false,
@@ -52,7 +52,7 @@ export const fetchQuizzes = createAsyncThunk<Quiz[], void, { rejectValue: string
     async (_, { rejectWithValue }) => {
         try {
             return await fetchQuizzesApi();
-        } catch (err: any) {
+        } catch (err: unknown) {
             return rejectWithValue(handleAsyncError(err));
         }
     }
@@ -63,7 +63,7 @@ export const fetchQuizById = createAsyncThunk<Quiz, number, { rejectValue: strin
     async (id, { rejectWithValue }) => {
         try {
             return await fetchQuizByIdApi(id);
-        } catch (err: any) {
+        } catch (err: unknown) {
             return rejectWithValue(handleAsyncError(err));
         }
     }
@@ -74,7 +74,7 @@ export const updateQuiz = createAsyncThunk<Quiz, Quiz, { rejectValue: string }>(
     async (quiz, { rejectWithValue }) => {
         try {
             return await updateQuizApi(quiz);
-        } catch (err: any) {
+        } catch (err: unknown) {
             return rejectWithValue(handleAsyncError(err));
         }
     }
@@ -87,7 +87,7 @@ export const deleteQuiz = createAsyncThunk<number, number, { rejectValue: string
             const result = await deleteQuizApi(id);
             if (!result) return rejectWithValue(`Quiz with id ${id} not found`);
             return id;
-        } catch (err: any) {
+        } catch (err: unknown) {
             return rejectWithValue(handleAsyncError(err));
         }
     }
@@ -98,7 +98,7 @@ export const addQuiz = createAsyncThunk<Quiz, Quiz, { rejectValue: string }>(
     async (quiz, { rejectWithValue }) => {
         try {
             return await addQuizApi(quiz);
-        } catch (err: any) {
+        } catch (err: unknown) {
             return rejectWithValue(handleAsyncError(err));
         }
     }
@@ -109,7 +109,7 @@ export const fetchQuestions = createAsyncThunk<Question[], void, { rejectValue: 
     async (_, { rejectWithValue }) => {
         try {
             return await fetchQuestionsApi();
-        } catch (err: any) {
+        } catch (err: unknown) {
             return rejectWithValue(handleAsyncError(err));
         }
     }
@@ -120,12 +120,68 @@ const quizzesSlice = createSlice({
     name: 'quizzes',
     initialState,
     reducers: {
+        startCreateQuiz(state) {
+            state.currentQuiz = {
+                name: '',
+                questions: [{ question: '', answer: '' }],
+            } as Quiz;
+            state.isSavedSuccessfully = false;
+            state.loadingError = undefined;
+        },
+
+        updateQuizName(state, action: PayloadAction<string>) {
+            if (state.currentQuiz) {
+                state.currentQuiz.name = action.payload;
+            }
+        },
+
+        updateQuizQuestion(
+            state,
+            action: PayloadAction<{
+                index: number,
+                field: 'question' | 'answer',
+                value: string
+            }>
+        ) {
+            const { index, field, value } = action.payload;
+            if (state.currentQuiz?.questions[index]) {
+                state.currentQuiz.questions[index] = {
+                    ...state.currentQuiz.questions[index],
+                    [field]: value,
+                };
+            }
+        },
+
+        swapQuestion(
+            state,
+            action: PayloadAction<{
+                index: number,
+                newQuestionId: number
+            }>
+        ) {
+            const { index, newQuestionId } = action.payload;
+            const question = state.allQuestions.find(q => q.id == Number(newQuestionId))!;
+            if (state.currentQuiz?.questions[index]) {
+                state.currentQuiz.questions[index] = question;
+            }
+        },
+
+        addQuestion(state) {
+            state.currentQuiz?.questions.push({ question: '', answer: '' });
+        },
+
+        removeQuestion(state, action: PayloadAction<{ index: number }>) {
+            const { index } = action.payload;
+            state.currentQuiz?.questions.splice(index, 1);
+        },
+
         resetEditState(state) {
-            return { 
-                ...state, 
-                isSaving: false, 
-                isSavedSuccessfully: false, 
-                currentQuiz: undefined,
+            return {
+                ...state,
+                isSaving: false,
+                isSavedSuccessfully: false,
+                saveError: undefined,
+                currentQuiz: null,
             };
         },
     },
@@ -189,7 +245,7 @@ const quizzesSlice = createSlice({
                 state.isDeleting = false;
                 const id = action.payload;
                 state.quizzes = state.quizzes.filter(q => q.id !== id);
-                if (state.currentQuiz?.id === id) state.currentQuiz = undefined;
+                if (state.currentQuiz?.id === id) state.currentQuiz = null;
             })
             .addCase(deleteQuiz.rejected, (state, action) => {
                 state.isDeleting = false;
@@ -232,7 +288,7 @@ const quizzesSlice = createSlice({
     },
 })
 
-export const { resetEditState } = quizzesSlice.actions;
+export const { addQuestion, startCreateQuiz, removeQuestion, updateQuizName, swapQuestion, updateQuizQuestion, resetEditState } = quizzesSlice.actions;
 
 
 export default quizzesSlice.reducer;
