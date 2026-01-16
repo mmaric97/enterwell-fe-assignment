@@ -21,25 +21,25 @@ export default function QuizAddEdit() {
         } else {
             dispatch(startCreateQuiz());
         }
+
+        dispatch(fetchQuestions());
     }, [isEditMode, id, dispatch]);
 
     useEffect(() => {
-        dispatch(fetchQuestions());
-    }, [dispatch]);
+        if (!isSavedSuccessfully) return;
 
-    useEffect(() => {
-        if (isSavedSuccessfully) {
-            setTimeout(() => {
-                navigate('/');
-            }, 1000);
-        }
+        const timer = setTimeout(() => {
+            navigate('/');
+        }, 1000);
+
+        return () => clearTimeout(timer);
     }, [isSavedSuccessfully, navigate]);
 
     useEffect(() => {
         return () => {
-            dispatch(resetEditState())
+            dispatch(resetEditState());
         };
-    }, [dispatch])
+    }, [dispatch]);
 
     if (!currentQuiz) return <p>Loading quiz...</p>;
     if (isLoading && !isSaving) return <p>Loading quiz...</p>;

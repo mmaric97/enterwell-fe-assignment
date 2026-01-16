@@ -14,12 +14,12 @@ type QuizState = {
 
     isDeleting: boolean;
 
-    loadingError: string | undefined;
-    saveError: string | undefined;
+    loadingError: string | null;
+    saveError: string | null;
 
     allQuestions: Question[];
     questionsLoading: boolean;
-    questionsError: string | undefined;
+    questionsError: string | null;
 }
 
 const initialState: QuizState = {
@@ -33,12 +33,12 @@ const initialState: QuizState = {
 
     isDeleting: false,
 
-    loadingError: undefined,
-    saveError: undefined,
+    loadingError: null,
+    saveError: null,
 
     allQuestions: [],
     questionsLoading: false,
-    questionsError: undefined
+    questionsError: null
 }
 
 const handleAsyncError = (err: unknown, defaultMessage = 'Unknown error'): string => {
@@ -126,7 +126,7 @@ const quizzesSlice = createSlice({
                 questions: [{ question: '', answer: '' }],
             } as Quiz;
             state.isSavedSuccessfully = false;
-            state.loadingError = undefined;
+            state.loadingError = null;
         },
 
         updateQuizName(state, action: PayloadAction<string>) {
@@ -180,7 +180,7 @@ const quizzesSlice = createSlice({
                 ...state,
                 isSaving: false,
                 isSavedSuccessfully: false,
-                saveError: undefined,
+                saveError: null,
                 currentQuiz: null,
             };
         },
@@ -190,23 +190,23 @@ const quizzesSlice = createSlice({
 
             // fetch all
             .addCase(fetchQuizzes.pending, (state) => {
-                state.isLoading = true
-                state.loadingError = undefined
+                state.isLoading = true;
+                state.loadingError = null;
             })
             .addCase(fetchQuizzes.fulfilled, (state, action) => {
-                state.isLoading = false
-                state.quizzes = action.payload
+                state.isLoading = false;
+                state.quizzes = action.payload;
             })
             .addCase(fetchQuizzes.rejected, (state, action) => {
-                state.isLoading = false
-                state.loadingError = action.payload
+                state.isLoading = false;
+                state.loadingError = action.payload ?? null;
             })
 
             // fetch single quiz
             .addCase(fetchQuizById.pending, (state) => {
                 state.isLoading = true;
                 state.isSavedSuccessfully = false;
-                state.loadingError = undefined;
+                state.loadingError = null;
             })
             .addCase(fetchQuizById.fulfilled, (state, action) => {
                 state.isLoading = false;
@@ -214,14 +214,14 @@ const quizzesSlice = createSlice({
             })
             .addCase(fetchQuizById.rejected, (state, action) => {
                 state.isLoading = false;
-                state.loadingError = action.payload;
+                state.loadingError = action.payload ?? "Something went wrong";
             })
 
             // update quiz
             .addCase(updateQuiz.pending, (state) => {
                 state.isSaving = true;
                 state.isSavedSuccessfully = false;
-                state.loadingError = undefined;
+                state.loadingError = null;
             })
             .addCase(updateQuiz.fulfilled, (state, action) => {
                 state.isSaving = false;
@@ -233,13 +233,13 @@ const quizzesSlice = createSlice({
             .addCase(updateQuiz.rejected, (state, action) => {
                 state.isSaving = false;
                 state.isSavedSuccessfully = false;
-                state.saveError = action.payload;
+                state.saveError = action.payload ?? "Something went wrong";
             })
 
             // delete quiz
             .addCase(deleteQuiz.pending, (state) => {
                 state.isDeleting = true;
-                state.saveError = undefined;
+                state.saveError = null;
             })
             .addCase(deleteQuiz.fulfilled, (state, action) => {
                 state.isDeleting = false;
@@ -249,14 +249,14 @@ const quizzesSlice = createSlice({
             })
             .addCase(deleteQuiz.rejected, (state, action) => {
                 state.isDeleting = false;
-                state.saveError = action.payload;
+                state.saveError = action.payload ?? "Something went wrong";
             })
 
             // update quiz
             .addCase(addQuiz.pending, (state) => {
                 state.isSaving = true;
                 state.isSavedSuccessfully = false;
-                state.loadingError = undefined;
+                state.loadingError = null;
             })
             .addCase(addQuiz.fulfilled, (state, action) => {
                 state.isSaving = false;
@@ -268,13 +268,13 @@ const quizzesSlice = createSlice({
             .addCase(addQuiz.rejected, (state, action) => {
                 state.isSaving = false;
                 state.isSavedSuccessfully = false;
-                state.saveError = action.payload;
+                state.saveError = action.payload ?? "Something went wrong";;
             })
 
             // fetch all questions
             .addCase(fetchQuestions.pending, (state) => {
                 state.questionsLoading = true;
-                state.loadingError = undefined;
+                state.loadingError = null;
             })
             .addCase(fetchQuestions.fulfilled, (state, action) => {
                 state.questionsLoading = false;
@@ -282,7 +282,7 @@ const quizzesSlice = createSlice({
             })
             .addCase(fetchQuestions.rejected, (state, action) => {
                 state.isLoading = false;
-                state.questionsError = action.payload;
+                state.questionsError = action.payload ?? "Something went wrong";;
             })
 
     },

@@ -87,7 +87,7 @@ export const createQuizzesInStorage = (quizzes: Quiz[]): void => {
 
 export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
 
-  const updatedQuizCopy = {...updatedQuiz};
+  const updatedQuizCopy = { ...updatedQuiz };
 
   const quizzes = getQuizzesFromStorage();
   const index = quizzes.findIndex(q => q.id === updatedQuizCopy.id);
@@ -102,10 +102,13 @@ export const updateQuizInStorage = (updatedQuiz: Quiz): Quiz => {
     const allQuestions = quizzes.flatMap(q => q.questions);
     const maxQuestionId = allQuestions.length > 0 ? Math.max(...allQuestions.map(q => q.id!)) : 0;
 
-    updatedQuizCopy.questions = updatedQuizCopy.questions.map((q, index) => ({
-      ...q,
-      id: maxQuestionId + index + 1,
-    }));
+    updatedQuizCopy.questions = updatedQuizCopy.questions.map((q, index) => {
+      return q.id != null ? q :
+        {
+          ...q,
+          id: maxQuestionId + index + 1,
+        }
+    });
   }
 
   quizzes[index] = updatedQuizCopy;
